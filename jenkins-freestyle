@@ -1,0 +1,36 @@
+# Variables
+# DOCKER_USERNAME=dockerhub-username
+# DOCKER_PASSWORD=dockerhub-password
+IMAGE_NAME=image-name
+
+# Clean up any existing repository folder
+rm -rf intuji-devops-internship-challenge
+
+# Clone the latest code from GitHub
+echo "Cloning the repository from GitHub..."
+git clone https://github.com/deepak6797/intuji-devops-internship-challenge.git
+cd intuji-devops-internship-challenge
+
+# Get the latest commit hash
+GIT_COMMIT=$(git rev-parse --short HEAD)
+
+# Build the Docker image
+echo "Building Docker image..."
+docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$GIT_COMMIT .
+
+# Login to Docker Hub
+echo "Logging in to Docker Hub..."
+echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+
+# Push the Docker image to Docker Hub
+echo "Pushing Docker image to Docker Hub..."
+docker push $DOCKER_USERNAME/$IMAGE_NAME:$GIT_COMMIT
+
+# Tag the latest build
+docker tag $DOCKER_USERNAME/$IMAGE_NAME:$GIT_COMMIT $DOCKER_USERNAME/$IMAGE_NAME:latest
+docker push $DOCKER_USERNAME/$IMAGE_NAME:latest
+
+# Clean up local Docker images
+echo "Cleaning up local Docker images..."
+docker rmi $DOCKER_USERNAME/$IMAGE_NAME:$GIT_COMMIT
+docker rmi $DOCKER_USERNAME/$IMAGE_NAME:latest
